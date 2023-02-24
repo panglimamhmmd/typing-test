@@ -10,12 +10,13 @@ const userInput = document.getElementById("typing_area");
 const wordsValid = document.getElementById("wordsValid");
 const wordsContainer = document.getElementById("words_container");
 
+let wordsAmount = 8; // jumlah karakter = 8
+let counter = wordsAmount; //
+let repetition = 1;
+
 let validWord = 0;
 let spacePressed = 0;
 let isStarted = false;
-let wordWillDisplay = 20;
-let spaceAttemp = 20; // display 20 word only
-let typeAttemp = 1;
 let validCharacterTotal = 0;
 let validSpaceTotal = 0;
 const words =
@@ -26,12 +27,9 @@ const randomWords = randomizeWords(words.split(" "));
 window.addEventListener("load", function () {
   wordsBuilder(randomWords, wordsContainer);
   wordsColor("highlight", 0);
-  wordsHide(20, 0);
+  hideAll();
+  displayWordsDefault();
   setDurationByDropdown(duration);
-});
-
-userInput.addEventListener("input", function (event) {
-  console.log(event.target.value);
 });
 
 // trigger timer
@@ -43,41 +41,36 @@ userInput.addEventListener("input", function (event) {
   }
 });
 
-// spasi trigger, agar kata di validasi (pc)
-// userInput.addEventListener("input", function (event) {
-//   const val = userInput.value;
-//   if (event.key == " ") {
-//     spaceDetected(val);
-//   }
-// });
-
 userInput.addEventListener("input", function (event) {
   const val = userInput.value;
-  const valValid = val.substr(0, val.length - 1);
+  const valValid = val.substr(0, val.length - 1); //karena spasi masuk ke value
   if (event.target.value.includes(" ")) {
     spaceDetected(valValid);
   }
 });
 
 function spaceDetected(value) {
-  if (value.length > 1) {
+  if (value.length >= 1) {
     if (value[0] == " ") {
       wordValidating(value.substr(1), spacePressed);
+      console.log(value);
     } else {
       wordValidating(value, spacePressed);
+      // console.log(value);
     }
   } else {
     userInput.value = "";
+    // console.log(value.length);
     return 0;
   }
 
+  // repetition words
+
   spacePressed++;
-  if (spacePressed == spaceAttemp) {
-    typeAttemp++;
-    spaceAttemp += 20;
-    console.log(spaceAttemp);
-    wordsUnhide(wordWillDisplay, typeAttemp);
-    wordsHide(wordWillDisplay, typeAttemp);
+  if (spacePressed == counter) {
+    repeatWords(repetition);
+    repetition++;
+    counter += wordsAmount;
   }
   userInput.value = "";
 }
@@ -85,7 +78,6 @@ function spaceDetected(value) {
 function randomizeWords(words) {
   // words type = array
   let newArr = [];
-
   // 200 untuk jumlah kata yang ada ada
   for (let i = 0; i < 200; i++) {
     const index = Math.floor(Math.random() * words.length);
@@ -93,17 +85,20 @@ function randomizeWords(words) {
   }
   return newArr;
 }
-
-// pembangun kata random
 function wordsBuilder(words, destination) {
+  let spaceAdd = 8; // setiap 10 kata dikasih <br>
   words.forEach((word, index) => {
-    destination.innerHTML += `<span class = "renderWords" id = wordrn${index}">${word}</span> `;
+    if (index + 1 == spaceAdd) {
+      destination.innerHTML += `<span class = "renderWords" id = wordrn${index}">${word} <br></span>  `;
+      spaceAdd += wordsAmount;
+    } else {
+      destination.innerHTML += `<span class = "renderWords" id = wordrn${index}">${word}</span> `;
+    }
   });
 }
-// timer jeuu
 
-// validasi kata jika benar dan salah
 function wordValidating(userWord, index) {
+  // validasi kata jika benar dan salah
   if (userWord == randomWords[index]) {
     wordsColor("valid", index);
     validCharacterTotal += userWord.length;
@@ -127,30 +122,6 @@ function wordsColor(condition, word_index) {
       random_span1[word_index].className = "invalid renderWords";
       break;
   }
-}
-
-function wordsHide(hide, attemp) {
-  const hidden_span1 = document.getElementsByClassName("renderWords");
-  // hide
-  if (attemp == 0) {
-    for (let i = hide; i < hidden_span1.length; i++) {
-      hidden_span1[i].style.display = "none";
-    }
-  } else {
-    for (let i = 0; i < hide * (attemp - 1); i++) {
-      hidden_span1[i].style.display = "none";
-    }
-  }
-}
-
-function wordsUnhide(unhide, attemp) {
-  // unhide
-
-  const hidden_span1 = document.getElementsByClassName("renderWords");
-  for (let i = 0; i < unhide * attemp; i++) {
-    hidden_span1[i].style.display = "";
-  }
-  // unhide
 }
 
 function resultCount() {
@@ -218,3 +189,35 @@ function setTimer(durasi, container) {
     }
   }, 1000);
 }
+
+const hideAll = () => {
+  const words = document.getElementsByClassName("renderWords");
+  // menghilangkan semua kata
+  for (let i = 0; i < words.length; i++) {
+    words[i].style.display = "none";
+  }
+};
+
+const displayWordsDefault = () => {
+  const words = document.getElementsByClassName("renderWords");
+  for (let i = 0; i < wordsAmount * 2; i++) {
+    words[i].style.display = "";
+  }
+};
+
+const repeatWords = (repetition) => {
+  const words = document.getElementsByClassName("renderWords");
+  // hapus row pertama
+  for (let i = 0; i < wordsAmount * repetition; i++) {
+    words[i].style.display = "none";
+  }
+
+  let secondRowIndex = wordsAmount * (repetition + 1);
+  let thirdRowIndex = wordsAmount * (repetition + 2);
+  // show row ketiga
+  for (let i = secondRowIndex; i < thirdRowIndex; i++) {
+    words[i].style.display = "";
+  }
+
+  console.log(secondRowIndex, thirdRowIndex);
+};
