@@ -24,12 +24,13 @@ const words =
 
 const randomWords = randomizeWords(words.split(" "));
 
+//settingan default
 window.addEventListener("load", function () {
-  wordsBuilder(randomWords, wordsContainer);
-  wordsColor("highlight", 0);
-  hideAll();
-  displayWordsDefault();
-  setDurationByDropdown(duration);
+  wordsBuilder(randomWords, wordsContainer); // memasukkan seluruh kata2
+  wordsColor("highlight", 0); // highlight kata pertama
+  hideAll(); // hide semua kata
+  displayWordsDefault(); // display 16 kata (2 row masing2 8 kata)
+  setDurationByDropdown(duration); // set durati dari dropdown
 });
 
 // trigger timer
@@ -41,11 +42,31 @@ userInput.addEventListener("input", function (event) {
   }
 });
 
+//spasi detection
 userInput.addEventListener("input", function (event) {
   const val = userInput.value;
   const valValid = val.substr(0, val.length - 1); //karena spasi masuk ke value
   if (event.target.value.includes(" ")) {
     spaceDetected(valValid);
+  }
+});
+
+// error detection
+let temp = 0;
+userInput.addEventListener("input", function (event) {
+  const first = event.target.value.length;
+  const characterInput = event.target.value[first - 1];
+  //jika
+  if (characterInput === undefined) {
+    temp = 0;
+  } else {
+    if (event.inputType === "deleteContentBackward") {
+      temp--;
+      errorDetection(spacePressed, temp, characterInput);
+    } else {
+      temp++;
+      errorDetection(spacePressed, temp, characterInput);
+    }
   }
 });
 
@@ -63,9 +84,7 @@ function spaceDetected(value) {
     // console.log(value.length);
     return 0;
   }
-
   // repetition words
-
   spacePressed++;
   if (spacePressed == counter) {
     repeatWords(repetition);
@@ -218,6 +237,16 @@ const repeatWords = (repetition) => {
   for (let i = secondRowIndex; i < thirdRowIndex; i++) {
     words[i].style.display = "";
   }
+};
 
-  console.log(secondRowIndex, thirdRowIndex);
+const errorDetection = (kataKeBerapa, hurufkeberapa, hurufInput) => {
+  // console.log(kataKeBerapa, hurufkeberapa - 1);
+  const char = randomWords[kataKeBerapa][hurufkeberapa - 1];
+  const random_span1 = document.getElementsByClassName("renderWords");
+  // console.log(char, hurufInput);
+  if (char !== hurufInput) {
+    random_span1[kataKeBerapa].className = "invalidBG renderWords";
+  } else {
+    random_span1[kataKeBerapa].className = "highlight renderWords";
+  }
 };
